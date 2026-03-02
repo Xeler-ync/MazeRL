@@ -1,6 +1,6 @@
 import pygame
 
-from utils.Maze import Maze
+from config import MAZE_ENV
 from utils.PygameRenderer import PygameRenderer
 
 
@@ -35,16 +35,4 @@ def human_play_pygame(env):
 
 
 if __name__ == "__main__":
-    human_play_pygame(
-        Maze(
-            [
-                [0, 0, 0, 0, 0],
-                [0, 1, 1, 0, 0],
-                [0, 0, 1, 0, 0],
-                [1, 0, 0, 0, 1],
-                [0, 0, 1, 0, 0],
-            ],
-            start=(0, 0),
-            goal=(4, 4),
-        )
-    )
+    human_play_pygame(MAZE_ENV)
