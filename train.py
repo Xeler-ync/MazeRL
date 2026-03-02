@@ -8,10 +8,17 @@ from utils.PygameRenderer import PygameRenderer
 from utils.QLearningAgent import QLearningAgent
 
 
-def train_with_pygame(env, agent, episodes=200, max_steps=100, render_interval=10):
+def train_with_pygame(
+    env,
+    agent,
+    episodes=200,
+    max_steps=100,
+    render_interval=10,
+    convergence_window=100,
+    convergence_threshold=1e-3,
+):
     """
-    Train the agent. If render_interval > 0, show a Pygame window every
-    `render_interval` episodes.
+    Train the agent with early stopping based on convergence.
     """
     renderer = PygameRenderer(env) if render_interval > 0 else None
     print_interval = (
@@ -51,6 +58,19 @@ def train_with_pygame(env, agent, episodes=200, max_steps=100, render_interval=1
         ep_time = time.time() - ep_start_time
         episode_times.append(ep_time)
 
+        # Check for convergence
+        if len(episode_rewards) >= 2 * convergence_window:
+            recent_avg = np.mean(episode_rewards[-convergence_window:])
+            prev_avg = np.mean(
+                episode_rewards[-2 * convergence_window : -convergence_window]
+            )
+            if abs(recent_avg - prev_avg) < convergence_threshold:
+                print(f"\nConverged after {ep+1} episodes!")
+                print(
+                    f"Average reward over last {convergence_window} episodes: {recent_avg:.2f}"
+                )
+                break
+
         if (ep + 1) % print_interval == 0:
             avg_reward = np.mean(episode_rewards[-print_interval:])
             avg_length = np.mean(episode_lengths[-print_interval:])
@@ -68,11 +88,11 @@ def train_with_pygame(env, agent, episodes=200, max_steps=100, render_interval=1
         pygame.quit()
 
     total_time = time.time() - start_time
-    avg_episode_time = total_time / episodes
+    avg_episode_time = total_time / (ep + 1)
     print("\nTraining Summary:")
     print(f"Total Training Time: {total_time:.2f}s")
     print(f"Average Episode Time: {avg_episode_time:.2f}s")
-    print(f"Episodes per Second: {episodes/total_time:.2f}")
+    print(f"Episodes per Second: {(ep+1)/total_time:}")
 
     return episode_rewards, episode_lengths
 
@@ -83,7 +103,13 @@ if __name__ == "__main__":
     )
     print("Training started")
     rewards, lengths = train_with_pygame(
-        MAZE_ENV, agent, episodes=200, render_interval=0
+        MAZE_ENV,
+        agent,
+        # Although the episodes is large, it will automatically terminate upon convergence.
+        episodes=MAZE_ENV.maze.size**3,
+        render_interval=0,
+        convergence_window=1000,
+        convergence_threshold=1e-8,
     )
-    # Save the trained Q-table
+    # Save the trained Q-tablef
     agent.save_q_table(MODEL_PATH)
