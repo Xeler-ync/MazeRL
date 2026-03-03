@@ -41,67 +41,6 @@ def generate_maze(
 
 
 def _carve_passages(
-    cx: int, cy: int, visited: set, width: int, height: int, maze: List[List[int]]
-):
-    """
-    Recursively carve passages through the maze using a modified algorithm
-    that prioritizes unvisited directions to create a main path first.
-    """
-    maze[cy][cx] = 0  # Mark current position as a path
-    visited.add((cx, cy))
-
-    # Prioritize directions that lead to unvisited areas
-    directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
-    # Sort directions by number of unvisited neighbors
-    directions.sort(
-        key=lambda d: sum(
-            1
-            for dx, dy in [(d[0] * 2, d[1] * 2)]
-            if 0 <= cx + dx < width
-            and 0 <= cy + dy < height
-            and (cx + dx, cy + dy) not in visited
-        )
-    )
-
-    for dx, dy in directions:
-        nx, ny = cx + dx, cy + dy
-        if (
-            0 <= nx < width
-            and 0 <= ny < height
-            and maze[ny][nx] == 1
-            and (nx, ny) not in visited
-        ):
-            # Carve passage between current and next position
-            maze[cy + dy // 2][cx + dx // 2] = 0
-            _carve_passages(nx, ny, visited, width, height, maze)
-
-
-def _create_branches(
-    path: List[Tuple[int, int]],
-    width: int,
-    height: int,
-    maze: List[List[int]],
-    branch_probability: float = 0.3,
-):
-    """
-    Create random branches along the main path with controlled probability.
-    """
-    for x, y in path:
-        if random.random() < branch_probability:
-            # Try to create a branch in a random direction
-            directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
-            random.shuffle(directions)
-
-            for dx, dy in directions:
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < width and 0 <= ny < height and maze[ny][nx] == 1:
-                    # Create a short branch
-                    maze[y + dy // 2][x + dx // 2] = 0
-                    maze[ny][nx] = 0
-                    break
-
-
-def _carve_passages(
     cx: int,
     cy: int,
     visited: set,
