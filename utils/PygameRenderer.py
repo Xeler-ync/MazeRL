@@ -55,7 +55,7 @@ class PygameRenderer:
         # Draw trail (if provided)
         if path:
             for pos in path:
-                if pos != self.maze.start and pos != self.maze.goal:
+                if pos not in [self.maze.start, self.maze.goal]:
                     r, c = pos
                     center = (
                         c * self.cell_size + self.cell_size // 2,

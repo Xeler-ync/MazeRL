@@ -62,17 +62,13 @@ def _carve_passages(
     directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
     directions.sort(
         key=lambda d: (
-            # Add randomness to prevent always choosing the same direction
             random.random(),
-            # Prioritize unvisited areas
             sum(
-                1
-                for dx, dy in [(d[0] * 2, d[1] * 2)]
-                if 0 <= cx + dx < width
+                0 <= cx + dx < width
                 and 0 <= cy + dy < height
                 and (cx + dx, cy + dy) not in visited
+                for dx, dy in [(d[0] * 2, d[1] * 2)]
             ),
-            # Consider distance to goal
             -abs((cx + d[0]) - goal_x) - abs((cy + d[1]) - goal_y),
         )
     )
